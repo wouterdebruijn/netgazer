@@ -1,1 +1,2 @@
 from .device_serializer import DeviceSerializer
+from .interface_serializer import InterfaceSerializer

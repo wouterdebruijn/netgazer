@@ -21,6 +21,7 @@ from netgazer import viewsets
 
 router = DefaultRouter()
 router.register(r'devices', viewsets.DeviceViewSet)
+router.register(r'interfaces', viewsets.InterfaceViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
