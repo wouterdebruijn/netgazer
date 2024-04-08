@@ -16,6 +16,9 @@ class Interface(models.Model):
 
     mac = models.CharField(max_length=17, unique=True, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return f"{self.name} - {self.ipv4}"
 
