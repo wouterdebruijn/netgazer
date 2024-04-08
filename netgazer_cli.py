@@ -19,9 +19,11 @@ def main():
     setup()
 
     from netgazer import management
+    from discovery import discover
 
     commands = {
-        'list_devices': management.list_devices
+        'list_devices': management.list_devices,
+        'discover': discover.discover,
     }
 
     if len(sys.argv) < 2:
