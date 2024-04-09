@@ -45,14 +45,14 @@ def nmap_discover(device):
 
 
 def discover():
-    device = {'ipv4': sys.argv[2]}
+    params = {'ipv4': sys.argv[2]}
 
-    print(f"Discovering {device['ipv4']}...")
-    attributes = nmap_discover(device)
+    print(f"Discovering {params['ipv4']}...")
+    attributes = nmap_discover(params)
 
     print(attributes.__dict__)
 
-    router = RouterSSH(device['ipv4'])
+    router = RouterSSH(params['ipv4'])
 
     # Get all device classes
     device_classes = RouterSSH.__subclasses__()
@@ -64,19 +64,47 @@ def discover():
         print(f"Unsupported vendor {attributes.vendor}!")
         return
 
-    router: RouterSSH = matching_classes[0](device['ipv4'])
+    router: RouterSSH = matching_classes[0](params['ipv4'])
 
-    print(f"Hostname: {router.get_hostname()}")
-    print(f"Interfaces: {router.get_interfaces()}")
-    print(f"ARP Table: {router.get_arp_table()}")
-    print(f"Discovered {device['ipv4']}!")
+    model = router.get_model()
+
+    interfaces = router.get_interfaces()
+    neighbors = router.get_arp_table()
 
     from netgazer.models import Device
 
-    device = Device.objects.create(
-        ipv4=device['ipv4'],
-        name=f'dummy {device["ipv4"]}',
+    [device, _] = Device.objects.update_or_create(
+        ipv4=params['ipv4'],
+        name=f'{model} {params["ipv4"]}',
+        manufacturer=attributes.vendor,
+        model=model,
+        os=attributes.os_name
     )
+
+    # Create interfaces
+    from netgazer.models import Interface
+
+    print(interfaces)
+
+    for interface in interfaces:
+        Interface.objects.update_or_create(
+            device=device,
+            name=interface['interface'],
+            ipv4=interface['ip_address'],
+        )
+
+    # Create neighbors
+    from netgazer.models import Neighbor
+
+    for neighbor in neighbors:
+        if neighbor['ip_address'] == device.ipv4:
+            continue
+
+        Neighbor.objects.update_or_create(
+            device=device,
+            ipv4=neighbor['ip_address'],
+            name=f'unknown {neighbor["ip_address"]}',
+        )
 
 
 if __name__ == '__main__':
