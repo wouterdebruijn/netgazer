@@ -18,11 +18,17 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from netgazer import viewsets
+from . import models
+
 
 router = DefaultRouter()
 router.register(r'devices', viewsets.DeviceViewSet)
 router.register(r'interfaces', viewsets.InterfaceViewSet)
 router.register(r'neighbors', viewsets.NeighborViewSet)
+
+admin.site.register(models.Device)
+admin.site.register(models.Interface)
+admin.site.register(models.Neighbor)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
