@@ -33,6 +33,7 @@ def main():
     command = sys.argv[1]
     if command not in commands:
         print(f"Command '{command}' not found")
+        print(f"Available commands: {', '.join(commands.keys())}")
         sys.exit(1)
 
     commands[command]()
