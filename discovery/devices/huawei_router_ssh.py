@@ -16,7 +16,7 @@ class HuaweiRouterSSH(RouterSSH):
         super().__init__(ipv4)
 
         self.config = {
-            'device_type': 'huawei',
+            'device_type': 'huawei_vrp',
             'host': ipv4,
             'username': 'admin',
             'password': 'Admin@huawei',
@@ -26,14 +26,18 @@ class HuaweiRouterSSH(RouterSSH):
         self.config.update(kwargs)
         self.connection = ConnectHandler(**self.config)
 
-    def get_hostname(self):
-        hostname = self.connection.send_command('display version')
-        return hostname
+    def get_model(self):
+        version_info = self.connection.send_command(
+            'display version', use_textfsm=True)
+
+        return version_info[0]['model']
 
     def get_interfaces(self):
-        interfaces = self.connection.send_command('display ip interface')
+        interfaces = self.connection.send_command(
+            'display ip interface brief', use_textfsm=True, textfsm_template='textfsm/huawei_display_ip_interface_brief.textfsm')
         return interfaces
 
     def get_arp_table(self):
-        arp_table = self.connection.send_command('display arp')
+        arp_table = self.connection.send_command(
+            'display arp brief', use_textfsm=True)
         return arp_table
