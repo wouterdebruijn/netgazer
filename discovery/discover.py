@@ -81,6 +81,15 @@ def discover():
         os=attributes.os_name
     )
 
+    # Update any neighbors that mention this device
+    from netgazer.models import Neighbor
+
+    neighbors = Neighbor.objects.filter(ipv4=params['ipv4'])
+
+    for neighbor in neighbors:
+        neighbor.neighbor_device = device
+        neighbor.save()
+
     # Create interfaces
     from netgazer.models import Interface
 
@@ -93,9 +102,6 @@ def discover():
             ipv4=interface['ip_address'],
         )
 
-    # Create neighbors
-    from netgazer.models import Neighbor
-
     for neighbor in neighbors:
         if neighbor['ip_address'] == device.ipv4:
             continue
@@ -104,6 +110,12 @@ def discover():
             device=device,
             ipv4=neighbor['ip_address'],
             name=f'unknown {neighbor["ip_address"]}',
+        )
+
+        # Run new discovery process for neighbor
+        subprocess.call(
+            ['python', 'netgazer_cli', 'discover', neighbor['ip_address']],
+            stdout=subprocess.DE
         )
 
 
