@@ -11,6 +11,7 @@ def device_map(request):
     mapped_devices = [{
         'id': device.name,
         'label': device.name,
+        'url': device.get_absolute_url(),
     } for device in devices]
 
     mapped_neighbors = [{
@@ -23,6 +24,7 @@ def device_map(request):
             mapped_devices.append({
                 'id': unknown_neighbor.name,
                 'label': unknown_neighbor.name,
+                'url': '#',
             })
             mapped_neighbors.append({
                 'source': unknown_neighbor.device.name,

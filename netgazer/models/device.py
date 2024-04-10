@@ -1,6 +1,7 @@
 from django.db import models
 from .interface import Interface
 from .neighbor import Neighbor
+from django.urls import reverse
 
 
 class Device(models.Model):
@@ -21,6 +22,9 @@ class Device(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('device-detail', kwargs={'pk': self.pk})
 
     def ipv4_addresses(self):
         return self.interface_set.filter(ipv4__isnull=False).values_list('ipv4', flat=True)

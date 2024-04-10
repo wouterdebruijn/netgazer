@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MapView</title>
+    <script src="https://unpkg.com/cytoscape@latest/dist/cytoscape.min.js"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MapView</title>
-  <script src="https://unpkg.com/cytoscape@latest/dist/cytoscape.min.js"></script>
-</head>
-
-<body style="background: lightgray;">
-  <div id="cy" style="width: 800px; height: 600px;"></div>
-  <script>
+  <body style="background: lightgray;">
+    <div id="cy" style="width: 100vw; height: 90vh;"></div>
+    <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var cy = cytoscape({
+      const cy = cytoscape({
         container: document.getElementById('cy'), // container to render in
 
         elements: [ // list of graph elements to start with
           // nodes
           {% for device in devices %}
-          { data: { id: '{{ device.id }}', label: '{{ device.label }}' } },
-        {% endfor %}
+          { data: { id: '{{ device.id }}', label: '{{ device.label }}', url: '{{ device.url }}' } },
+          {% endfor %}
 
           {% for edge in edges %}
-          { data: { source: '{{ edge.source }}', target: '{{ edge.target }}' } },
+            { data: { source: '{{ edge.source }}', target: '{{ edge.target }}' } },
           {% endfor %}
         ],
 
@@ -50,9 +49,18 @@
       name: 'circle',
     }
       });
+
+      cy.on('tap', 'node', function(event) {
+        var nodeData = event.target.data();
+        if (nodeData.url) {
+            window.location.href = nodeData.url; // Redirect to the node's URL
+        }
+    });
     });
 
   </script>
-</body>
-
+  </body>
+  <div style="background: #132332; position: absolute; bottom: 0; left: 0; right: 0; height: 35px; display: flex; align-items: center; font-family: Monospace;">
+    <p style="color: white; position: absolute; right: 10px;">Wouter de Bruijn - 2024</p>
+  </div>
 </html>
