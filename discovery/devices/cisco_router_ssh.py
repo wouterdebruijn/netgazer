@@ -26,7 +26,7 @@ class CiscoRouterSSH(RouterSSH):
         self.config.update(kwargs)
         self.connection = ConnectHandler(**self.config)
 
-    def get_hostname(self):
+    def get_model(self):
         hostname = self.connection.send_command('show version')
         return hostname
 

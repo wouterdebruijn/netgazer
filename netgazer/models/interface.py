@@ -6,7 +6,9 @@ class Interface(models.Model):
     description = models.TextField(blank=True)
 
     ipv4 = models.GenericIPAddressField(protocol='IPv4', null=True)
+    ipv4_mask = models.PositiveSmallIntegerField(null=True)
     ipv6 = models.GenericIPAddressField(protocol='IPv6', null=True)
+    ipv6_mask = models.PositiveSmallIntegerField(null=True)
 
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True)

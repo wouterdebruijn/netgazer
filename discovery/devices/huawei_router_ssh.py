@@ -26,7 +26,13 @@ class HuaweiRouterSSH(RouterSSH):
         self.config.update(kwargs)
         self.connection = ConnectHandler(**self.config)
 
-    def get_model(self):
+    def get_hostname(self) -> str:
+        hostname = self.connection.send_command(
+            'display current-configuration | include sysname', use_textfsm=True, textfsm_template='textfsm/huawei_display_current_config_sysname.textfsm')
+
+        return hostname[0]['sysname']
+
+    def get_model(self) -> str:
         version_info = self.connection.send_command(
             'display version', use_textfsm=True)
 

@@ -1,15 +1,12 @@
 from django.db import models
+from .interface import Interface
+from .neighbor import Neighbor
 
 
 class Device(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
-    ipv4 = models.GenericIPAddressField(protocol='IPv4', unique=True)
-    ipv6 = models.GenericIPAddressField(
-        protocol='IPv6', unique=True, null=True)
-
-    mac = models.CharField(max_length=17, unique=True, null=True)
     os = models.CharField(max_length=100, null=True)
     manufacturer = models.CharField(max_length=100, null=True)
     model = models.CharField(max_length=100, null=True)
@@ -17,8 +14,16 @@ class Device(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    interface_set: models.QuerySet[Interface]
+    neighbor_set: models.QuerySet[Neighbor]
+
+    run_id = models.UUIDField()
+
     def __str__(self):
         return self.name
+
+    def ipv4_addresses(self):
+        return self.interface_set.filter(ipv4__isnull=False).values_list('ipv4', flat=True)
 
     class Meta:
         ordering = ['name']
