@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from netgazer import viewsets
+from .views.DeviceViews import device_map
 from . import models
 
 
@@ -34,4 +35,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
+    path('map/', device_map),
 ]

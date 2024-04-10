@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MapView</title>
+  <script src="https://unpkg.com/cytoscape@latest/dist/cytoscape.min.js"></script>
+</head>
+
+<body style="background: lightgray;">
+  <div id="cy" style="width: 800px; height: 600px;"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var cy = cytoscape({
+        container: document.getElementById('cy'), // container to render in
+
+        elements: [ // list of graph elements to start with
+          // nodes
+          {% for device in devices %}
+          { data: { id: '{{ device.id }}', label: '{{ device.label }}' } },
+        {% endfor %}
+
+          {% for edge in edges %}
+          { data: { source: '{{ edge.source }}', target: '{{ edge.target }}' } },
+          {% endfor %}
+        ],
+
+    style: [ // the stylesheet for the graph
+      {
+        selector: 'node',
+        style: {
+          'background-color': '#666',
+          'label': 'data(label)'
+        }
+      },
+
+      {
+        selector: 'edge',
+        style: {
+          'width': 3,
+          'line-color': '#ccc',
+          'target-arrow-color': '#ccc',
+          'target-arrow-shape': 'triangle'
+        }
+      }
+    ],
+
+      layout: {
+      name: 'circle',
+    }
+      });
+    });
+
+  </script>
+</body>
+
+</html>
