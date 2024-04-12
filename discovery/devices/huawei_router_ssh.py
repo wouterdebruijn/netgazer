@@ -47,3 +47,8 @@ class HuaweiRouterSSH(RouterSSH):
         arp_table = self.connection.send_command(
             'display arp brief', use_textfsm=True)
         return arp_table
+
+    def get_lldp_neighbors(self):
+        lldp_neighbors = self.connection.send_command(
+            'display lldp neighbor', use_textfsm=True, textfsm_template='textfsm/huawei_display_lldp_neighbor.textfsm')
+        return lldp_neighbors

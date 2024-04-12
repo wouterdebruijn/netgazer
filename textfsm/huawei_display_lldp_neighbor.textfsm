@@ -1,0 +1,12 @@
+Value Interface (\S+)
+Value PortId (\S+)
+Value Required SystemName (\S+)
+Value ManagementAddressType (\S+)
+Value ManagementAddress (\S+)
+
+Start
+  ^${Interface} has \d+ neighbors(:)?$$
+  ^Port ID\s+:${PortId}$$
+  ^System name\s+:${SystemName}$$
+  ^Management address type\s+:${ManagementAddressType}$$
+  ^Management address\s+:\s+${ManagementAddress}$$ -> Record
