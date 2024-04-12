@@ -63,7 +63,7 @@ def discover():
     # Initial nmap discovery to get vendor and OS
     attributes = nmap_discover(params)
 
-    router = RouterSSH(params['ipv4'])
+    router: RouterSSH
     device_classes = RouterSSH.__subclasses__()
     matching_classes = list(
         filter(lambda device_class: device_class.vendor_match(attributes.vendor), device_classes))
@@ -82,6 +82,7 @@ def discover():
     model = router.get_model()
     interfaces = router.get_interfaces()
     arp_entries = router.get_arp_table()
+    lldp_neighbors = router.get_lldp_neighbors()
 
     from netgazer.models import Device
 
