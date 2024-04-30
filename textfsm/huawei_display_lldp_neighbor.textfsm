@@ -9,4 +9,4 @@ Start
   ^Port ID\s+:${PortId}$$
   ^System name\s+:${SystemName}$$
   ^Management address type\s+:${ManagementAddressType}$$
-  ^Management address\s+:\s+${ManagementAddress}$$ -> Record
+  ^Management address\s+:\s+${ManagementAddress}\s+$$ -> Record
