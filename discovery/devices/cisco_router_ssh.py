@@ -1,6 +1,6 @@
 from netmiko import ConnectHandler
 from netmiko.base_connection import BaseConnection
-from .generic import RouterSSH
+from .generic import RouterSSH, Interface
 
 
 class CiscoRouterSSH(RouterSSH):
@@ -8,8 +8,8 @@ class CiscoRouterSSH(RouterSSH):
     config: dict
     connection: BaseConnection
 
-    @staticmethod
-    def vendor_match(vendor: str) -> bool:
+    @classmethod
+    def vendor_match(cls, vendor: str) -> bool:
         return vendor.lower() == 'cisco'
 
     def __init__(self, ipv4, **kwargs):
@@ -32,8 +32,43 @@ class CiscoRouterSSH(RouterSSH):
 
     def get_interfaces(self):
         interfaces = self.connection.send_command('show ip interface brief')
-        return interfaces
+
+        mapped = []
+
+        for interface in interfaces:
+            mapped.append(Interface(
+                name=interface['interface'],
+                ipv4=interface['ip_address'] if interface['ip_address'] != 'unassigned' else None,
+                physical=interface['physical'],
+                protocol=interface['protocol']
+            ))
+
+        return mapped
 
     def get_arp_table(self):
         arp_table = self.connection.send_command('show arp')
-        return arp_table
+
+        mapped = []
+
+        for entry in arp_table:
+            mapped.append(Neighbor(
+                name=entry['mac_address'],
+                ipv4=entry['ip_address'],
+                interface_name=entry['interface']
+            ))
+
+        return mapped
+
+    def get_lldp_neighbors(self):
+        lldp_table = self.connection.send_command('show lldp neighbors')
+
+        mapped = []
+
+        for entry in lldp_table:
+            mapped.append(Neighbor(
+                name=entry['neighbor'],
+                ipv4=None,
+                interface_name=entry['local_interface']
+            ))
+
+        return mapped

@@ -55,6 +55,10 @@ def nmap_discover(device):
 
 
 def discover():
+    """
+    Run the discovery process for a device, fetching different attributes and creating the corresponding database entries.
+    Neighbor devices are also discovered in this process, creating new database entries for unknown devices and updating existing ones.
+    """
     params = {'ipv4': sys.argv[2], 'run_id': sys.argv[3] if len(
         sys.argv) > 3 else uuid.uuid4()}
 
@@ -63,10 +67,9 @@ def discover():
     # Initial nmap discovery to get vendor and OS
     attributes = nmap_discover(params)
 
-    router: RouterSSH
     device_classes = RouterSSH.__subclasses__()
-    matching_classes = list(
-        filter(lambda device_class: device_class.vendor_match(attributes.vendor), device_classes))
+    matching_classes = list(filter(lambda device_class: device_class.vendor_match(
+        attributes.vendor), device_classes))
 
     if len(matching_classes) == 0:
         logging.warn(
@@ -75,7 +78,7 @@ def discover():
         return
 
     # Select the first matching class, matched by device vendor
-    router: RouterSSH = matching_classes[0](params['ipv4'])
+    router = matching_classes[0](params['ipv4'])
 
     # Gather device information
     hostname = router.get_hostname()
@@ -123,15 +126,12 @@ def discover():
     logger.debug(f"Interfaces: {interfaces}")
 
     for interface in interfaces:
-        split_ip = interface['ip_address'].split(
-            '/') if '/' in interface['ip_address'] else [interface['ip_address'], 24]
-
         _interface, created = Interface.objects.update_or_create(
             device=device,
-            name=interface['interface'],
+            name=interface.name,
             defaults={
-                'ipv4': split_ip[0],
-                'ipv4_mask': split_ip[1],
+                'ipv4': interface.ipv4,
+                'ipv4_mask': interface.ipv4_mask,
             }
         )
 
@@ -144,29 +144,65 @@ def discover():
 
     logger.debug(f"ARP entries: {arp_entries}")
 
-    for arp_entry in arp_entries:
-        if arp_entry['ip_address'] in my_addresses:
-            continue
+    # for arp_entry in arp_entries:
+    #     if arp_entry.ipv4 in my_addresses:
+    #         continue
+
+    #     # Create or update neighbor entries for the current device
+    #     neighbor, created = Neighbor.objects.update_or_create(
+    #         device=device,
+    #         ipv4=arp_entry.ipv4,
+    #         defaults={
+    #             'name': f"{arp_entry.ipv4} ({arp_entry.name})",
+    #         },
+    #     )
+
+    #     if created:
+    #         logging.info(
+    #             f'\033[1;32mCreated\033[1;0m ARP neighbor {neighbor}.')
+    #     else:
+    #         logging.info(
+    #             f'\033[1;33mUpdated\033[1;0m ARP neighbor {neighbor}.')
+
+    logger.debug(f"LLDP neighbors: {lldp_neighbors}")
+
+    for lldp_neighbor in lldp_neighbors:
+
+        if lldp_neighbor.mgmt_address_type != 'ipv4':
+            matching_arp = list(
+                filter(lambda arp: arp.mac ==
+                       lldp_neighbor.mgmt_address, arp_entries)
+            )
+
+            if len(matching_arp) == 0:
+                logging.warn(
+                    f"No matching ARP entry found for LLDP neighbor {lldp_neighbor}.")
+                continue
+
+            lldp_neighbor.mgmt_address = matching_arp[0].ipv4
+            lldp_neighbor.mgmt_address_type = 'ipv4'
 
         # Create or update neighbor entries for the current device
         neighbor, created = Neighbor.objects.update_or_create(
             device=device,
-            ipv4=arp_entry['ip_address'],
+            ipv4=lldp_neighbor.mgmt_address,
             defaults={
-                'name': f"{arp_entry['ip_address']} ({arp_entry['mac_address']})",
+                'name': f"{lldp_neighbor.mgmt_address} ({lldp_neighbor.system_name})",
             },
         )
 
         if created:
             logging.info(
-                f'\033[1;32mCreated\033[1;0m neighbor {neighbor}.')
+                f'\033[1;32mCreated\033[1;0m LLDP neighbor {neighbor}.')
         else:
             logging.info(
-                f'\033[1;33mUpdated\033[1;0m neighbor {neighbor}.')
+                f'\033[1;33mUpdated\033[1;0m LLDP neighbor {neighbor}.')
 
+    # Run discovery for neighbors
+    for neighbor in device.neighbor_set.all():
         # Check if the neighbor is known
         known_neighbor = devices_in_run.filter(
-            interface__ipv4=arp_entry['ip_address'])
+            interface__ipv4=neighbor.ipv4)
         if known_neighbor.exists():
             neighbor.neighbor_device = known_neighbor.first()
             neighbor.save()
@@ -175,7 +211,7 @@ def discover():
         # Run new discovery process for neighbor
         subprocess.call(
             ['python', 'netgazer_cli.py', 'discover',
-                arp_entry['ip_address'], str(params['run_id'])]
+                neighbor.ipv4, str(params['run_id'])]
         )
 
 

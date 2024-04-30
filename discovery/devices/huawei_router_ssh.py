@@ -1,6 +1,6 @@
 from netmiko import ConnectHandler
 from netmiko.base_connection import BaseConnection
-from .generic import RouterSSH
+from .generic import Interface, RouterSSH, LldpNeighbor, ArpEntry
 
 
 class HuaweiRouterSSH(RouterSSH):
@@ -8,8 +8,8 @@ class HuaweiRouterSSH(RouterSSH):
     config: dict
     connection: BaseConnection
 
-    @staticmethod
-    def vendor_match(vendor: str) -> bool:
+    @classmethod
+    def vendor_match(cls, vendor: str) -> bool:
         return vendor.lower() == 'huawei'
 
     def __init__(self, ipv4, **kwargs):
@@ -41,14 +41,50 @@ class HuaweiRouterSSH(RouterSSH):
     def get_interfaces(self):
         interfaces = self.connection.send_command(
             'display ip interface brief', use_textfsm=True, textfsm_template='textfsm/huawei_display_ip_interface_brief.textfsm')
-        return interfaces
+
+        mapped = []
+
+        for interface in interfaces:
+            split_ip = interface['ip_address'].split(
+                '/') if '/' in interface['ip_address'] else [interface['ip_address'], 24]
+
+            mapped.append(Interface(
+                name=interface['interface'],
+                ipv4=split_ip[0],
+                ipv4_mask=split_ip[1],
+                physical=interface['physical'],
+                protocol=interface['protocol']
+            ))
+
+        return mapped
 
     def get_arp_table(self):
         arp_table = self.connection.send_command(
             'display arp brief', use_textfsm=True)
-        return arp_table
+
+        mapped = []
+
+        for entry in arp_table:
+            mapped.append(ArpEntry(
+                interface=entry['interface'],
+                ipv4=entry['ip_address'],
+                mac=entry['mac_address']
+            ))
+
+        return mapped
 
     def get_lldp_neighbors(self):
         lldp_neighbors = self.connection.send_command(
             'display lldp neighbor', use_textfsm=True, textfsm_template='textfsm/huawei_display_lldp_neighbor.textfsm')
-        return lldp_neighbors
+
+        mapped = []
+
+        for neighbor in lldp_neighbors:
+            mapped.append(LldpNeighbor(
+                interface=neighbor['interface'],
+                mgmt_address=neighbor['managementaddress'],
+                mgmt_address_type='mac' if 'all802' in neighbor['managementaddresstype'] else 'ipv4',
+                system_name=neighbor['systemname']
+            ))
+
+        return mapped
