@@ -50,8 +50,8 @@ class HuaweiRouterSSH(RouterSSH):
 
             mapped.append(Interface(
                 name=interface['interface'],
-                ipv4=split_ip[0],
-                ipv4_mask=split_ip[1],
+                ipv4=split_ip[0] if split_ip[0] != 'unassigned' else None,
+                ipv4_mask=split_ip[1] if split_ip[0] != 'unassigned' else None,
                 physical=interface['physical'],
                 protocol=interface['protocol']
             ))
