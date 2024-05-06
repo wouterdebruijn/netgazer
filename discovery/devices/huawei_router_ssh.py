@@ -1,6 +1,10 @@
+from typing import List
 from netmiko import ConnectHandler
 from netmiko.base_connection import BaseConnection
 from .generic import Interface, RouterSSH, LldpNeighbor, ArpEntry
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class HuaweiRouterSSH(RouterSSH):
@@ -30,19 +34,30 @@ class HuaweiRouterSSH(RouterSSH):
         hostname = self.connection.send_command(
             'display current-configuration | include sysname', use_textfsm=True, textfsm_template='textfsm/huawei_display_current_config_sysname.textfsm')
 
+        logger.debug(f'Hostname: {hostname}')
+
         return hostname[0]['sysname']
 
-    def get_model(self) -> str:
+    def get_model(self) -> List[str]:
         version_info = self.connection.send_command(
             'display version', use_textfsm=True)
 
-        return version_info[0]['model']
+        logger.debug(f'Model: {version_info}')
+
+        board_info = self.connection.send_command(
+            'display elabel', use_textfsm=True, textfsm_template='textfsm/huawei_display_elabel.textfsm')
+
+        logger.debug(f'Board Info: {board_info}')
+
+        return [version_info[0]['model'], board_info[0]['serial']]
 
     def get_interfaces(self):
         interfaces = self.connection.send_command(
             'display ip interface brief', use_textfsm=True, textfsm_template='textfsm/huawei_display_ip_interface_brief.textfsm')
 
         mapped = []
+
+        logger.debug(f'Interfaces: {interfaces}')
 
         for interface in interfaces:
             split_ip = interface['ip_address'].split(
@@ -64,6 +79,8 @@ class HuaweiRouterSSH(RouterSSH):
 
         mapped = []
 
+        logger.debug(f'ARP Table: {arp_table}')
+
         for entry in arp_table:
             mapped.append(ArpEntry(
                 interface=entry['interface'],
@@ -79,6 +96,8 @@ class HuaweiRouterSSH(RouterSSH):
 
         mapped = []
 
+        logger.debug(f'LLDP neighbors: {lldp_neighbors}')
+
         for neighbor in lldp_neighbors:
             mapped.append(LldpNeighbor(
                 interface=neighbor['interface'],
@@ -88,3 +107,11 @@ class HuaweiRouterSSH(RouterSSH):
             ))
 
         return mapped
+
+    def get_license(self) -> str:
+        license_info = self.connection.send_command(
+            'display license', use_textfsm=True)
+
+        logger.debug(f'License: {license_info}')
+
+        return license_info

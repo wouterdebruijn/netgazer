@@ -1,0 +1,7 @@
+Value SERIAL (\S+)
+
+Start
+  ^\[Main_Board\] -> Board
+
+Board
+  ^\s*?BarCode=${SERIAL} -> Record

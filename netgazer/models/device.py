@@ -19,6 +19,7 @@ class Device(models.Model):
     neighbor_set: models.QuerySet[Neighbor]
 
     run_id = models.UUIDField()
+    context = models.JSONField(null=True)
 
     def __str__(self):
         return self.name

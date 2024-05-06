@@ -86,6 +86,7 @@ def discover():
     interfaces = router.get_interfaces()
     arp_entries = router.get_arp_table()
     lldp_neighbors = router.get_lldp_neighbors()
+    license = router.get_license()
 
     from netgazer.models import Device
 
@@ -101,8 +102,12 @@ def discover():
         defaults={
             'os': attributes.os_name,
             'manufacturer': attributes.vendor,
-            'model': model,
+            'model': model[0],
             'run_id': params['run_id'],
+            'context': {
+                'license': license,
+                'serial_number': model[1],
+            }
         }
     )
 

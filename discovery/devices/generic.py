@@ -63,7 +63,7 @@ class RouterSSH(ABC):
         print(f"get_hostname is implemented on {self.__class__.__name__}")
 
     @abstractmethod
-    def get_model(self) -> str:
+    def get_model(self) -> List[str]:
         """
         Get the model of the device, e.g. 'Cisco 2911'
         """
@@ -90,3 +90,10 @@ class RouterSSH(ABC):
         """
         print(
             f"get_lldp_neighbors is implemented on {self.__class__.__name__}")
+
+    @abstractmethod
+    def get_license(self) -> str:
+        """
+        Get the license information of the device, e.g. 'Cisco IOS Software [Fuji], ISR Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 16.9.4, RELEASE SOFTWARE (fc1)'
+        """
+        print(f"get_license is implemented on {self.__class__.__name__}")
