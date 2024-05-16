@@ -21,7 +21,7 @@
           {% endfor %}
 
           {% for edge in edges %}
-            { data: { source: '{{ edge.source }}', target: '{{ edge.target }}' } },
+            { data: { content: '{{ edge.label }}', source: '{{ edge.source }}', target: '{{ edge.target }}' } },
           {% endfor %}
         ],
 
@@ -41,6 +41,24 @@
           'line-color': '#ccc',
           'target-arrow-color': '#ccc',
           'target-arrow-shape': 'triangle'
+        }
+      },
+
+      {
+        selector: 'edge[content]',
+        style: {
+          'label': 'data(content)',
+          'text-wrap': 'wrap',
+          'text-max-width': 80,
+          'font-size': 10,
+          'color': 'black',
+          'text-outline-width': 2,
+          'text-outline-color': 'white',
+          'curve-style': 'bezier',
+          'target-arrow-shape': 'triangle',
+          'target-arrow-color': 'black',
+          'line-color': 'black',
+          'width': 2
         }
       }
     ],

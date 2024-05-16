@@ -17,6 +17,7 @@ def device_map(request):
     mapped_neighbors = [{
         'source': neighbor.device.name,
         'target': neighbor.neighbor_device.name,
+        'label': neighbor.name
     } for neighbor in neighbors if neighbor.device and neighbor.device.name and neighbor.neighbor_device and neighbor.neighbor_device.name]
 
     for unknown_neighbor in neighbors:
