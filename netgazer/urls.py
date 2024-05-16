@@ -20,7 +20,10 @@ from rest_framework.routers import DefaultRouter
 from netgazer import viewsets
 from .views.DeviceViews import device_map
 from . import models
-
+from django.conf import settings
+from django.conf.urls.static import static
+from django.views.decorators.csrf import csrf_exempt
+from .views.discovery_view import AsyncView
 
 router = DefaultRouter()
 router.register(r'devices', viewsets.DeviceViewSet)
@@ -32,8 +35,9 @@ admin.site.register(models.Interface)
 admin.site.register(models.Neighbor)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
+    path('admin/', admin.site.urls),
     path('map/', device_map),
-]
+    path('discovery/', csrf_exempt(AsyncView.as_view())),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

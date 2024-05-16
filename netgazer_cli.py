@@ -3,6 +3,7 @@
 import os
 import sys
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +59,18 @@ def main():
         print(f"Available commands: {', '.join(commands.keys())}")
         sys.exit(1)
 
-    ipv4 = sys.argv[2] if len(sys.argv) > 2 else None
+    if command == 'discover':
+        if len(sys.argv) < 3:
+            print("Usage: netgazer_cli.py discover <ipv4> <run_id>")
+            sys.exit(1)
 
-    if ipv4 == None:
-        exit(1)
+        ipv4 = sys.argv[2] if len(sys.argv) > 2 else None
+        run_id = sys.argv[3] if len(sys.argv) > 3 else uuid.uuid4()
 
-    commands[command](ipv4)
+        commands[command](ipv4=ipv4, run_id=run_id)
+
+    else:
+        commands[command]()
 
 
 if __name__ == '__main__':

@@ -61,7 +61,7 @@ def discover(ipv4: str, run_id: str = uuid.uuid4()):
     """
     params = {'ipv4': ipv4, 'run_id': run_id}
 
-    logger.info(f"Discovering {params['ipv4']}...")
+    logger.info(f"Discovering {params['ipv4']}... {params['run_id']}")
 
     # Initial nmap discovery to get vendor and OS
     attributes = nmap_discover(params)
