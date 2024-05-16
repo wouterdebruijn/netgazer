@@ -54,13 +54,12 @@ def nmap_discover(device):
     return attributes
 
 
-def discover():
+def discover(ipv4: str, run_id: str = uuid.uuid4()):
     """
     Run the discovery process for a device, fetching different attributes and creating the corresponding database entries.
     Neighbor devices are also discovered in this process, creating new database entries for unknown devices and updating existing ones.
     """
-    params = {'ipv4': sys.argv[2], 'run_id': sys.argv[3] if len(
-        sys.argv) > 3 else uuid.uuid4()}
+    params = {'ipv4': ipv4, 'run_id': run_id}
 
     logger.info(f"Discovering {params['ipv4']}...")
 

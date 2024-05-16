@@ -58,7 +58,12 @@ def main():
         print(f"Available commands: {', '.join(commands.keys())}")
         sys.exit(1)
 
-    commands[command]()
+    ipv4 = sys.argv[2] if len(sys.argv) > 2 else None
+
+    if ipv4 == None:
+        exit(1)
+
+    commands[command](ipv4)
 
 
 if __name__ == '__main__':
