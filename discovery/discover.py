@@ -136,6 +136,8 @@ def discover(ipv4: str, run_id: str = uuid.uuid4()):
             defaults={
                 'ipv4': interface.ipv4,
                 'ipv4_mask': interface.ipv4_mask,
+                'protocol': interface.protocol,
+                'physical': interface.physical
             }
         )
 

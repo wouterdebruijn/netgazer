@@ -67,8 +67,8 @@ class HuaweiRouterSSH(RouterSSH):
                 name=interface['interface'],
                 ipv4=split_ip[0] if split_ip[0] != 'unassigned' else None,
                 ipv4_mask=split_ip[1] if split_ip[0] != 'unassigned' else None,
-                physical=interface['physical'],
-                protocol=interface['protocol']
+                physical=False if interface['physical'] == 'down' else True,
+                protocol=False if interface['protocol'] == 'down' else True
             ))
 
         return mapped
